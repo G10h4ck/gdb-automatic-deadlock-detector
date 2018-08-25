@@ -65,8 +65,11 @@ class DisplayLockedThreads(gdb.Command):
                 while frame:
                     frame.select()
                     #print("   {0}".format(frame.name()))
-                    if "pthread_mutex_lock" in frame.name():
-                        trd.waitOnThread = int(gdb.execute("print mutex.__data.__owner", to_string=True).split()[2])
+                    if "RsMutex::lock" in frame.name():
+                        try:
+                            trd.waitOnThread = int(gdb.execute("print this.realMutex.__data.__owner", to_string=True).split()[2])
+                        except gdb.error as e:
+                            print('Caught gdb.error ' + str(e))
                         #print(threads[-1].waitOnThread)
                     trd.frames.append(frame.name())
                     frame = frame.older()
